@@ -1,0 +1,961 @@
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////		     This code will convert the GMT			  ////////////////////////////////////
+	///////////////		     form of the timezone abbreviation into	      ////////////////////////////////////
+	//////////////     small form snd if not exist it will show the GMT   ////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/dayjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/advancedFormat.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/timezone.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+	<title>Server Time</title>
+
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background: rgb(238,174,202);
+            background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);
+            font-size: 20px;
+		}
+
+		.local-time {
+			text-align: center;
+			padding: 20px;
+		}
+
+		h1 {
+			color: #333;
+		}
+
+		.time-container {
+			font-size: 24px;
+			color: black;
+			margin: 10px 0;
+		}
+
+		.timezone-container {
+			font-size: 50px;
+			color: darkred;
+		}
+
+		.timeAsLocalTime
+		{
+			color:black;
+			background-color:skyblue;
+		}
+	</style>
+</head>
+<body>
+
+
+	<hr />
+	<p>Format: dddd DD MMMM YYYY HH:mm:ss zzz</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm:ss zzz" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	<hr />
+	<p>Format: dddd DD MMMM YYYY HH:mm z</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	<hr />
+	<p>Format: dddd DD MMMM YYYY HH:mm</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	<hr />
+	<p>Format: dddd D MMMM, YYYY</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">I</p>
+	<hr />
+	<p>Format: D MMMM YYYY, HH:mm</p>
+	<p class="timeAsLocalTime" data-timFormat="D MMMM YYYY, HH:mm" data-utcTime="2023-02-31T16:26+10:00">M</p>
+	<hr />
+	<p>Format: dddd D MMM, YYYY</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">E</p>
+	<hr />
+	<p>Default format to test:</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-25T23:48:00.0000000Z"></p>
+	<hr />
+	<p>Time:</p>
+	<p class="timeAsLocalTime" data-timFormat="HH       :       mm      :       ss" data-utcTime="2023-10-23T16:26+10:00"></p>
+
+	<div class="matchTime">
+		<script>
+			function displayLocalTime() {
+				dayjs.extend(window.dayjs_plugin_advancedFormat);
+				dayjs.extend(window.dayjs_plugin_timezone);
+
+				//const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+				const timeContainers = document.querySelectorAll('.timeAsLocalTime');
+
+				// Update the time display in each paragraph
+				function updateTime() {
+					var userTime = dayjs();
+
+					timeContainers.forEach((container) => {
+						const format = container.getAttribute('data-timFormat');
+						var eventTime = container.getAttribute('data-utcTime');
+						//data-utcTime whatever is in
+						//var userTime = dayjs(eventTime);
+						let userTimeWithTimeZone = userTime.format(format);
+
+						//Modify the timezone text
+						if (/z/.test(format) && !/zzz/.test(format)) {
+							var longTZ = dayjs().format('zzz');
+							var numTZ = dayjs().format('z');
+							var subsTZ = '';
+
+							switch (longTZ) {
+								case 'Australian Eastern Daylight Time':
+									subsTZ = 'AEDT';
+									break;
+								case 'Australian Eastern Standard Time':
+									subsTZ = 'AEST';
+									break;
+								case 'Australian Central Standard Time':
+									subsTZ = 'ACST';
+									break;
+								case 'Australian Central Daylight Time':
+									subsTZ = 'ACDT';
+									break;
+								case 'Australian Western Standard Time':
+									subsTZ = 'AWST';
+									break;
+								case 'Australian Central Western Standard Time':
+									subsTZ = 'ACWST';
+									break;
+								case 'Lord Howe Daylight Time':
+									subsTZ = 'LHDT';
+									break;
+								case 'Lord Howe Standard Time':
+									subsTZ = 'LHST';
+									break;
+								case 'Norfolk Island Daylight Time':
+									subsTZ = 'NFDT';
+									break;
+								case 'Christmas Island Time':
+									subsTZ = 'CXT';
+									break;
+								case 'Cocos Islands Time':
+									subsTZ = 'CCT';
+									break;
+								case 'New Zealand Daylight Time':
+									subsTZ = 'NZDT';
+									break;
+								case 'New Zealand Standard Time':
+									subsTZ = 'NZST';
+									break;
+							}
+
+							if (subsTZ.length > 0)
+								userTimeWithTimeZone = userTimeWithTimeZone.replace(numTZ, subsTZ);
+						}
+						container.textContent = userTimeWithTimeZone;
+					});
+				}
+
+				// Update the time every second
+				setInterval(updateTime, 1000);
+				updateTime();
+			}
+
+			displayLocalTime();
+		</script>
+	</div>
+</body>
+</html>
+
+<!-- @*////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////               Code ends here			  ////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////*@ -->
+
+
+
+<!-- @*////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////      This code will convert the long	  ////////////////////////////////////////
+	///////////////////////		 form of the timezone abbreviation	  ////////////////////////////////////////
+	//////////////////////		 into small form and show the time	  ////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////*@ -->
+
+
+<!-- <!DOCTYPE html>
+	<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/dayjs.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/advancedFormat.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/timezone.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+		<title>Server Time</title>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f2f2f2;
+			}
+
+			.local-time {
+				text-align: center;
+				padding: 20px;
+			}
+
+			h1 {
+				color: #333;
+			}
+
+			.time-container {
+				font-size: 24px;
+				color: black;
+				margin: 10px 0;
+			}
+
+			.timezone-container {
+				font-size: 50px;
+				color: darkred;
+			}
+		</style>
+	</head>
+	<body>
+
+
+		<hr />
+		<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm zzz" data-utcTime="2023-10-23T16:26+10:00">T</p>
+		<hr />
+		<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-23T16:26+10:00">T</p>
+		<hr />
+		<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm" data-utcTime="2023-10-23T16:26+10:00">T</p>
+		<hr />
+		<p class="timeAsLocalTime" data-timFormat="dddd D MMMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">I</p>
+		<hr />
+		<p class="timeAsLocalTime" data-timFormat="D MMMM YYYY, HH:mm" data-utcTime="2023-10-23T16:26+10:00">M</p>
+		<hr />
+		<p class="timeAsLocalTime" data-timFormat="dddd D MMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">E</p>
+		<hr />
+		<p>Default:</p>
+		<p class="timeAsLocalTime" data-utcTime="2023-10-23T16:26+10:00"></p>
+
+		<div class="matchTime">
+			<script>
+				function displayLocalTime() {
+					dayjs.extend(window.dayjs_plugin_advancedFormat);
+					dayjs.extend(window.dayjs_plugin_timezone);
+
+					//const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+					const timeContainers = document.querySelectorAll('.timeAsLocalTime');
+
+					// Update the time display in each paragraph
+					function updateTime() {
+						const userTime = dayjs();
+
+						timeContainers.forEach((container) => {
+							const format = container.getAttribute('data-timFormat');
+							let userTimeWithTimeZone = userTime.format(format);
+
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Australian Eastern Daylight Time', 'AEDT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Australian Western Standard Time', 'AWST');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Australian Central Western Standard Time', 'ACWST');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Australian Central Standard Time', 'ACST');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Australian Eastern Standard Time', 'AEST');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Australian Central Daylight Time', 'ACDT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Lord Howe Daylight Time', 'LHDT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Lord Howe Standard Time', 'LHST');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Norfolk Island Daylight Time', 'NFDT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Christmas Island Time', 'CXT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('Cocos Islands Time', 'CCT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('New Zealand Daylight Time', 'NZDT');
+							userTimeWithTimeZone = userTimeWithTimeZone.replace('New Zealand Standard Time', 'NZST');
+
+							//Check if the abbreviation is in the list
+							if (format.includes('zzz')) {
+								if (!/AEDT|AWST|ACWST|ACST|AEST|ACDT|LHDT|LHST|NFDT|CXT|CCT|NZDT|NZST/.test(userTimeWithTimeZone)) {
+									userTimeWithTimeZone = dayjs().format('dddd DD MMMM YYYY HH:mm z')
+								}
+							}
+
+							container.textContent = userTimeWithTimeZone;
+						});
+					}
+
+					// Update the time every second
+					setInterval(updateTime, 1000);
+					updateTime();
+				}
+
+				displayLocalTime();
+			</script>
+		</div>
+	</body>
+	</html> -->
+
+
+<!-- @*////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////               Code ends here			  ////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////*@ -->
+
+
+
+
+
+<!-- <!DOCTYPE html>
+	<html>
+	<head>
+
+		<title>Server Time</title>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f2f2f2;
+			}
+
+			.local-time {
+				text-align: center;
+				padding: 20px;
+			}
+
+			h1 {
+				color: #333;
+			}
+
+			#timeContainer {
+				font-size: 24px;
+				color: black;
+				margin: 10px 0;
+			}
+
+			#timezoneContainer {
+				font-size: 50px;
+				color: darkred;
+			}
+
+		</style>
+
+	</head>
+	<body>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-23T16:26+10:00">T</p>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm" data-utcTime="2023-10-23T16:26+10:00">T</p>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">I</p>
+
+	<p class="timeAsLocalTime" data-timFormat="D MMMM YYYY, HH:mm" data-utcTime="2023-10-23T16:26+10:00">M</p>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">E</p>
+
+	<p class="timeAsLocalTime" data-utcTime="2023-10-23T16:26+10:00"></p>
+
+		<div class="local-time">
+			<h1>Server Time</h1>
+			<p id="timeContainer">Loading...</p>
+			<p id="timezoneContainer">Timezone: Loading...</p>
+		</div>
+
+		<div class="matchTime">
+			<script>
+				function displayLocalTime() {
+					const timeContainer = document.getElementById('timeContainer');
+					const timezoneContainer = document.getElementById('timezoneContainer');
+					const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+					// Update the time display
+					function updateTime() {
+						const userTime = new Date();
+						const userTimeOptions = {
+							weekday: 'long',
+							year: 'numeric',
+							month: 'short',
+							day: 'numeric',
+							hour: 'numeric',
+							minute: 'numeric',
+							second: 'numeric',
+							hour12: false,
+						};
+						const userTimeWithTimeZone = userTime.toLocaleString(undefined, userTimeOptions);
+
+						timeContainer.textContent = userTimeWithTimeZone;
+						const timezoneAbbreviation = determineTimezoneAbbreviation(userTimeZone);
+						timezoneContainer.textContent = 'Timezone: ' + timezoneAbbreviation;
+					}
+
+					// Update the time every second
+					setInterval(updateTime, 1000);
+					updateTime();
+				}
+
+				function determineTimezoneAbbreviation(timezone) {
+					var timezoneAbbreviations = {
+						'Australia/Sydney': 'AEST',
+						'Australia/Melbourne': 'AEST',
+						'Australia/Brisbane': 'AEST',
+						'Australia/Hobart': 'AEST',
+						'Australia/Adelaide': 'ACST',
+						'Australia/Darwin': 'ACST',
+						'Australia/Perth': 'AWST',
+						'Australia/Lord_Howe': 'LHST',
+						'Australia/Eucla': 'ACWST',
+						'Australia/Broken_Hill': 'ACST',
+						'Europe/London': 'GMT',
+					};
+
+					return timezoneAbbreviations[timezone] || getGMTOffset(timezone);
+				}
+
+				function getGMTOffset(timezone) {
+					const offsetHours = new Date().getTimezoneOffset() / -60;
+					return 'GMT' + (offsetHours >= 0 ? ' + ' : ' ') + offsetHours;
+				}
+
+				displayLocalTime();
+			</script>
+		</div>
+
+
+	</body>
+	</html> -->
+
+
+
+<!-- ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////				Helpers		              ////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+
+
+<!-- 'Australian Eastern Daylight Time': 'AEDT',
+	'Australian Western Standard Time': 'AWST',
+
+//if format string !'zzz'
+		//dayjs().format('zzz')
+		//dayjs().format('z')
+
+	//var tzs = /(.*(GMT\+.*))/.exec(userTimeWithTimeZone)[2];
+	//switch (tzs) {
+	//	case "GTM+10": userTimeWithTimeZone.replace(tzs, 'AEST');
+	//	case "GTM+11": userTimeWithTimeZone.replace(tzs, 'AEDT');
+	//} -->
+
+<!-- @*<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-23T16:26+10:00">T</p>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm" data-utcTime="2023-10-23T16:26+10:00">T</p>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">I</p>
+
+	<p class="timeAsLocalTime" data-timFormat="D MMMM YYYY, HH:mm" data-utcTime="2023-10-23T16:26+10:00">M</p>
+
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">E</p>
+
+	<p class="timeAsLocalTime" data-utcTime="2023-10-23T16:26+10:00"></p>*@ -->
+
+
+<!-- @*////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////               Code ends here			  ////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////*@ -->
+
+
+
+<!-- @*////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////               		All test			  	   ///////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////*@ -->
+
+	<!-- <!DOCTYPE html>
+	<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/dayjs.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/advancedFormat.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/timezone.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	
+		<title>Server Time</title>
+	
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background: rgb(238, 174, 202);
+				background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+				font-size: 20px;
+			}
+	
+			.local-time {
+				text-align: center;
+				padding: 20px;
+			}
+	
+			h1 {
+				color: #333;
+			}
+	
+			.time-container {
+				font-size: 24px;
+				color: black;
+				margin: 10px 0;
+			}
+	
+			.timezone-container {
+				font-size: 50px;
+				color: darkred;
+			}
+	
+			.timeAsLocalTime {
+				color: black;
+				background-color: skyblue;
+			}
+		</style>
+	</head>
+	<body>
+	
+	<hr />
+	<p>Format: dddd DD MMMM YYYY HH:mm:ss zzz</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm:ss zzz" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	<hr />
+	<p>Format: dddd DD MMMM YYYY HH:mm z</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	<hr />
+	<p>Format: dddd DD MMMM YYYY HH:mm</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	<hr />
+	<p>Format: dddd D MMMM, YYYY</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">I</p>
+	<hr />
+	<p>Format: D MMMM YYYY, HH:mm</p>
+	<p class="timeAsLocalTime" data-timFormat="D MMMM YYYY, HH:mm" data-utcTime="2023-10-23T16:26+10:00">M</p>
+	<hr />
+	<p>Format: dddd D MMM, YYYY</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd D MMM, YYYY" data-utcTime="2023-10-23T16:26+10:00">E</p>
+	<hr />
+	<p>Default format to test:</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-10-25T23:48:00.0000000Z">Z</p>
+	<hr />
+	<p>Default format to test:</p>
+	<p class="timeAsLocalTime" data-timFormat="dddd DD MMMM YYYY HH:mm z" data-utcTime="2023-04-30T23:48:00.0000000Z">Z</p>
+	<hr />
+	
+	<p>Time:</p>
+	<p class="timeAsLocalTime" data-timFormat="HH : mm : ss" data-utcTime="2023-10-23T16:26+10:00">T</p>
+	
+	<div class="matchTime">
+		<script>
+			function isValidDate(dateStr) {
+				const parts = dateStr.split('T')[0].split('-');
+				if (parts.length !== 3) {
+					return false;
+				}
+	
+				const year = parseInt(parts[0], 10);
+				const month = parseInt(parts[1], 10);
+				const day = parseInt(parts[2], 10);
+	
+				if (isNaN(year) || isNaN(month) || isNaN(day)) {
+					return false;
+				}
+	
+				if (month < 1 || month > 12) {
+					return false;
+				}
+	
+				const daysInMonth = new Date(year, month, 0).getDate();
+				if (day < 1 || day > daysInMonth) {
+					return false;
+				}
+	
+				return true;
+			}
+	
+			function displayLocalTime() {
+				dayjs.extend(window.dayjs_plugin_advancedFormat);
+				dayjs.extend(window.dayjs_plugin_timezone);
+	
+				const timeContainers = document.querySelectorAll('.timeAsLocalTime');
+	
+				function updateTime() {
+					timeContainers.forEach((container) => {
+						const format = container.getAttribute('data-timFormat');
+						const eventTime = container.getAttribute('data-utcTime');
+	
+						if (isValidDate(eventTime)) {
+							var userTime = dayjs(eventTime);
+							let userTimeWithTimeZone = userTime.format(format);
+	
+							if (/z/.test(format) && !/zzz/.test(format)) {
+								var longTZ = dayjs().format('zzz');
+								var numTZ = dayjs().format('z');
+								var subsTZ = '';
+	
+								switch (longTZ) {
+									case 'Australian Eastern Daylight Time':
+										subsTZ = 'AEDT';
+										break;
+									case 'Australian Eastern Standard Time':
+										subsTZ = 'AEST';
+										break;
+									// Add cases for other timezones as needed
+								}
+	
+								if (subsTZ.length > 0)
+									userTimeWithTimeZone = userTimeWithTimeZone.replace(numTZ, subsTZ);
+							}
+							container.textContent = userTimeWithTimeZone;
+						} else {
+							container.textContent = 'Invalid Date';
+						}
+					});
+				}
+	
+				setInterval(updateTime, 1000);
+				updateTime();
+			}
+	
+			displayLocalTime();
+		</script>
+	</div>
+	</body>
+	</html> -->
+
+<!-- <hr>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/timezone.min.js"></script>
+    <title>DayJS Example</title>
+</head>
+<body>
+    <h1>Display Dates in If Statement Block</h1>
+    <div id="dateContainer"></div>
+    <div id="currentTime"></div>
+
+    <script>
+        //dayjs.extend(window.dayjs_plugin_timezone);
+
+        function updateDates() {
+            const dateContainer = document.getElementById('dateContainer');
+            const currentTimeElement = document.getElementById('currentTime');
+            
+            // Display the current time
+            //const currentTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+            //currentTimeElement.textContent = `Current Time: ${currentTime}`;
+
+            var a = 1; // Example for testing only
+            var pValues = ['D', 'W', 'M', 'Y'];
+            var formats = {};
+
+            pValues.forEach((p) => {
+                var susdate;
+                var format = '';
+
+                if (a > 0) {
+                    switch (p) {
+                        case "D":
+							if (dayjs().hour() > 20) {
+								susdate = dayjs().add(a + 1, "days");
+							} else {
+								susdate = dayjs().add(a, "days");
+							}
+							break;
+
+                        case "W":
+                            susdate = dayjs().add(a, "weeks");
+                            break;
+
+                        case "M":
+                            susdate = dayjs().add(a, "months");
+                            break;
+
+                        case "Y":
+                            susdate = dayjs().add(a, "years");
+                            break;
+                    }
+                }
+
+                formats[p] = susdate.format(format);
+            });
+
+            pValues.forEach((p) => {
+                dateContainer.innerHTML += `Date for '${p}': ${formats[p]}<br>`;
+            });
+        }
+
+        updateDates();
+    </script>
+
+	<br/>
+	<br/>
+	<br/>
+
+	<script>
+
+        function updateDates() {
+            
+            //const currentTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+            var a = 1; // Example for testing only
+            var pValues = ['D', 'W', 'M', 'Y'];
+            var customDate = dayjs('2024-02-27'); 
+            var formats = {};
+
+            pValues.forEach((p) => {
+                var susdate;
+                var format = '';
+
+                if (a > 0) {
+                    switch (p) {
+
+                        case "D":
+							if (customDate.hour() > 20) 
+							{
+								susdate = customDate.add(a + 1, "days");
+							} else 
+							{
+								susdate = customDate.add(a, "days");
+							}
+							break;
+
+                        case "W":
+                            susdate = customDate.add(a, "weeks");
+                            break;
+
+                        case "M":
+                            susdate = customDate.add(a, "months");
+                            break;
+
+                        case "Y":
+                            susdate = customDate.add(a, "years");
+                            break;
+                    }
+                }
+
+                formats[p] = susdate.format(format);
+            });
+
+            pValues.forEach((p) => {
+                dateContainer.innerHTML += `Date for '${p}' Custom: ${formats[p]}<br>`;
+            });
+        }
+        updateDates();
+    </script>
+</body>
+</html> -->
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.5/plugin/timezone.min.js"></script>
+    <title>DayJS Example</title>
+</head>
+<body>
+    <h1>Display Dates in If Statement Block</h1>
+    <div id="dateContainer"></div>
+    <div id="currentTime"></div>
+
+    <script>
+        dayjs.extend(window.dayjs_plugin_timezone);
+
+        // Set the user's timezone
+        dayjs.tz.setDefault("Australia/Sydney"); // Replace with the user's timezone
+
+        function updateDates() {
+            
+            const currentTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+            var a = 1; // Example for testing only
+            var pValues = ['D', 'W', 'M', 'Y'];
+            var customDate = dayjs('2024-04-24'); 
+            var formats = {};
+
+            pValues.forEach((p) => {
+                var susdate;
+                var format = '';
+
+                if (a > 0) {
+                    switch (p) {
+                        case "D":
+                            susdate = customDate.add(a + 1, "days");
+                            format = 'DD';
+                            break;
+                        case "W":
+                            susdate = customDate.add(a, "weeks");
+                            format = '-- NO WEEKS';
+                            break;
+                        case "M":
+                            susdate = customDate.add(a, "months");
+                            format = 'MM';
+                            break;
+                        case "Y":
+                            susdate = customDate.add(a, "years");
+                            format = 'YYYY';
+                            break;
+                    }
+                }
+
+                formats[p] = susdate.format(format);
+            });
+
+            pValues.forEach((p) => {
+                dateContainer.innerHTML += `Date for '${p}' Custom: ${formats[p]}<br>`;
+            });
+        }
+
+        // Update dates immediately
+        updateDates();
+    </script>
+</body>
+</html>
+ -->
+	
+<!-- @*////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////               Code ends here			  ////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////*@ -->
+
+
+<!-- <% if(!match.isLive) { %>
+	<div class="matchTime">
+
+		<%--This is important to use--%>
+		<div id="timeContainer_<%= match.eid %>"></div>
+
+		<script>
+
+			// Server time in UTC format and convert as Date
+			var serverTime = new Date('<%= match.outcomeAt.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") %>');
+
+			//Only Australia Timezones
+			var timezoneAbbreviations =
+			{
+				'Australia/Sydney': 'AEST',
+				'Australia/Melbourne': 'AEST',
+				'Australia/Brisbane': 'AEST',
+				'Australia/Hobart': 'AEST',
+				'Australia/Adelaide': 'ACST',
+				'Australia/Darwin': 'ACST',
+				'Australia/Perth': 'AWST',
+				'Australia/Lord_Howe': 'LHST',
+				'Australia/Eucla': 'ACWST',
+				'Australia/Broken_Hill': 'ACST',
+				//Playtech Zone
+				'Europe/London': 'GMT',
+			}
+
+			// Format the server time to the user's local timezone
+			var userTimeOptions = {
+				weekday: 'long',
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+				hour: 'numeric',
+				minute: 'numeric',
+				hour12: false,		//Hour bool 24 or 12
+			};
+
+			// Gettin timezone abbreviation
+			var userTimeZoneAbbreviation = timezoneAbbreviations[Intl.DateTimeFormat().resolvedOptions().timeZone];
+
+			//If Timezone not exist or mentioned in the list => Will change to GMT soon
+			if (!userTimeZoneAbbreviation) {
+
+				var offsetHours = (serverTime.getTimezoneOffset() / -60);
+				userTimeZoneAbbreviation = 'GMT ' + (offsetHours >= 0 ? '+' : '') + offsetHours;
+			}
+
+			var userTime = serverTime.toLocaleString(navigator.language, userTimeOptions);
+
+			var userTimeWithTimeZone = userTime + ' (' + userTimeZoneAbbreviation + ')';
+
+			// Display user's local time
+			//document.write(userTimeWithTimeZone); => Don't Use, It will load the Script first and wait for refresh to load the other content
+			document.getElementById('timeContainer_<%= match.eid %>').textContent = userTimeWithTimeZone;
+		</script>
+	</div>
+								<%} %>
+
+								<%if(match.location.Length > 0) { %>
+	<div class="matchVenue"><%= match.location %></div>
+								<%} %>
+
+	<div style="display: flex;">
+		<div style="display: inline-block; margin-right: 5px;">Time Left:</div>
+		<div id="matchTimeLeftCountDown" class="countdown<%= match.isLive ? " ttgLive" : "" %>
+			">
+			<%= sharedFuncs.Generate_TTGCountdownMarkup(match.outcomeAt, GWBetInterfaces.GWEnums.SportType.ANY_SPORT, true, isLive: match.isLive) %>
+		</div>
+	</div>
+
+
+	<script>
+
+		function formatTimeLeft(timeText) {
+			var regex = /(\d+)\s*(hour|hr|h)?\s*(\d*)\s*(minute|min)?/i;
+			var match = timeText.match(regex);
+
+			if (match) {
+				var hours = parseInt(match[1]) || 0;
+				var minutes = parseInt(match[3]) || 0;
+
+				var formattedTime = "";
+
+				if (hours > 0) {
+					formattedTime += hours + (hours > 1 ? " hours" : " hour");
+					if (minutes > 0) {
+						formattedTime += " and ";
+					}
+				}
+
+				if (minutes > 0) {
+					formattedTime += minutes + (minutes > 1 ? " minutes" : " minute");
+				}
+
+				return formattedTime;
+			}
+
+			return timeText; // Return the original text if no valid format is found
+		}
+
+		var matchTimeElement = document.getElementById('matchTimeLeftCountDown');
+		var timeLeftText = matchTimeElement.textContent;
+		var formattedTime = formatTimeLeft(timeLeftText);
+		matchTimeElement.textContent = formattedTime;
+	</script> -->
